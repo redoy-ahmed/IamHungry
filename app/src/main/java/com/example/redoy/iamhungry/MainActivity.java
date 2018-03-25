@@ -29,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
     String resultText;
     Dialog voiceSearch;
     RecyclerViewAdapterHome adapterHome;
+    ArrayList<String> searchResult;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -131,7 +132,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initializeData() {
-        ArrayList<HomeItem> rowListItem = getAllItemList();
+        searchResult = getIntent().getStringArrayListExtra("results");
+
+        ArrayList<HomeItem> rowListItem = getAllItemList(searchResult);
         adapterHome = new RecyclerViewAdapterHome(getApplicationContext(), rowListItem, getSupportFragmentManager());
         homeRecyclerView.setAdapter(adapterHome);
 
@@ -139,15 +142,12 @@ public class MainActivity extends AppCompatActivity {
         homeRecyclerView.setLayoutManager(layoutManager);
     }
 
-    private ArrayList<HomeItem> getAllItemList() {
+    private ArrayList<HomeItem> getAllItemList(ArrayList<String> searchResult) {
 
         ArrayList<HomeItem> allItems = new ArrayList<>();
-        allItems.add(new HomeItem("KFC", R.drawable.a, "#09A9FF"));
-        allItems.add(new HomeItem("BFC", R.drawable.b, "#09A9FF"));
-        allItems.add(new HomeItem("Star Kabab", R.drawable.c, "#09A9FF"));
-        allItems.add(new HomeItem("American Burger", R.drawable.d, "#09A9FF"));
-        allItems.add(new HomeItem("Indian Burger", R.drawable.e, "#09A9FF"));
-
+        for (int i = 0; i < searchResult.size(); i++) {
+            allItems.add(new HomeItem(searchResult.get(i), R.drawable.a, "#09A9FF"));
+        }
         return allItems;
     }
 }

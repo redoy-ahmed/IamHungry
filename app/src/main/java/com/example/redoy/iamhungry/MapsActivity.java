@@ -31,6 +31,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.ArrayList;
+
 import retrofit.Call;
 import retrofit.Callback;
 import retrofit.GsonConverterFactory;
@@ -45,11 +47,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap mMap;
     double latitude;
     double longitude;
-    private int PROXIMITY_RADIUS = 10000;
+    private int PROXIMITY_RADIUS = 1000;
     GoogleApiClient mGoogleApiClient;
     Location mLastLocation;
     Marker mCurrLocationMarker;
     LocationRequest mLocationRequest;
+    ArrayList<String> searchResult;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,6 +109,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mMap.setMyLocationEnabled(true);
         }
 
+        searchResult = new ArrayList<>();
+
         Button btnRestaurant = findViewById(R.id.btnRestaurant);
         btnRestaurant.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -134,7 +139,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         btnVoiceSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(MapsActivity.this, MainActivity.class));
+                if(searchResult.size()!=0) {
+                    Intent intent = new Intent(MapsActivity.this, MainActivity.class);
+                    intent.putStringArrayListExtra("results",searchResult);
+                    startActivity(intent);
+                }else {
+                    Toast.makeText(getApplicationContext(),"Dont have any data to search",Toast.LENGTH_LONG).show();
+                }
             }
         });
     }
@@ -176,7 +187,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
                         // move map camera
                         mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-                        mMap.animateCamera(CameraUpdateFactory.zoomTo(11));
+                        mMap.animateCamera(CameraUpdateFactory.zoomTo(16));
+
+                        searchResult.add(placeName);
                     }
                 } catch (Exception e) {
                     Log.d("onResponse", "There is an error");
@@ -245,7 +258,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         //move map camera
         mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(11));
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(16));
 
         Log.d("onLocationChanged", String.format("latitude:%.3f longitude:%.3f", latitude, longitude));
 
