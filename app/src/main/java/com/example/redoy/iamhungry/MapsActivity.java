@@ -39,10 +39,15 @@ import retrofit.GsonConverterFactory;
 import retrofit.Response;
 import retrofit.Retrofit;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
+public class MapsActivity extends FragmentActivity implements
+        OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
-        LocationListener {
+        LocationListener,
+        GoogleMap.OnCameraMoveStartedListener,
+        GoogleMap.OnCameraMoveListener,
+        GoogleMap.OnCameraMoveCanceledListener,
+        GoogleMap.OnCameraIdleListener {
 
     private GoogleMap mMap;
     double latitude;
@@ -90,7 +95,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return true;
     }
 
-
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
@@ -107,6 +111,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         } else {
             buildGoogleApiClient();
             mMap.setMyLocationEnabled(true);
+            mMap.getUiSettings().setZoomGesturesEnabled(true);
+            mMap.getUiSettings().setZoomControlsEnabled(true);
         }
 
         searchResult = new ArrayList<>();
@@ -139,12 +145,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         btnVoiceSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(searchResult.size()!=0) {
+                if (searchResult.size() != 0) {
                     Intent intent = new Intent(MapsActivity.this, MainActivity.class);
-                    intent.putStringArrayListExtra("results",searchResult);
+                    intent.putStringArrayListExtra("results", searchResult);
                     startActivity(intent);
-                }else {
-                    Toast.makeText(getApplicationContext(),"Dont have any data to search",Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(getApplicationContext(), "Dont have any data to search", Toast.LENGTH_LONG).show();
                 }
             }
         });
@@ -257,8 +263,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mCurrLocationMarker = mMap.addMarker(markerOptions);
 
         //move map camera
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(16));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,16));
+        //mMap.animateCamera(CameraUpdateFactory.zoomTo(16));
 
         Log.d("onLocationChanged", String.format("latitude:%.3f longitude:%.3f", latitude, longitude));
 
@@ -304,8 +310,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
             case MY_PERMISSIONS_REQUEST_LOCATION: {
                 // If request is cancelled, the result arrays are empty.
@@ -335,5 +340,40 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             // other 'case' lines to check for other permissions this app might request.
             // You can add here other case statements according to your requirement.
         }
+    }
+
+    @Override
+    public void onCameraMoveStarted(int reason) {
+
+        if (reason == GoogleMap.OnCameraMoveStartedListener.REASON_GESTURE) {
+            Toast.makeText(getApplicationContext(), "The user gestured on the map.",
+                    Toast.LENGTH_SHORT).show();
+        } else if (reason == GoogleMap.OnCameraMoveStartedListener
+                .REASON_API_ANIMATION) {
+            Toast.makeText(getApplicationContext(), "The user tapped something on the map.",
+                    Toast.LENGTH_SHORT).show();
+        } else if (reason == GoogleMap.OnCameraMoveStartedListener
+                .REASON_DEVELOPER_ANIMATION) {
+            Toast.makeText(getApplicationContext(), "The app moved the camera.",
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onCameraMove() {
+        Toast.makeText(getApplicationContext(), "The camera is moving.",
+                Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onCameraMoveCanceled() {
+        Toast.makeText(getApplicationContext(), "Camera movement canceled.",
+                Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onCameraIdle() {
+        Toast.makeText(getApplicationContext(), "The camera has stopped moving.",
+                Toast.LENGTH_SHORT).show();
     }
 }
